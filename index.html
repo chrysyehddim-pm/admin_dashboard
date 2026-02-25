@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧健康服務平台</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0fdf4; /* 溫和的淺綠色背景 */
+            color: #1e293b;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 500px; width: 100%;
+            background: white; border-radius: 24px; padding: 30px 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center; margin-top: 2vh;
+        }
+        h1 { color: #16a34a; margin-bottom: 5px; font-size: 1.8rem; }
+        p.subtitle { color: #64748b; margin-bottom: 30px; font-size: 1rem; }
+        
+        .section-title {
+            text-align: left;
+            font-size: 1.1rem;
+            color: #475569;
+            font-weight: bold;
+            margin: 25px 0 10px 10px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+        }
+
+        .menu-btn {
+            display: flex; align-items: center; justify-content: flex-start; gap: 15px;
+            width: 100%; padding: 16px 20px; margin-bottom: 12px;
+            background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px;
+            text-decoration: none; color: #334155; font-size: 1.15rem; font-weight: bold;
+            transition: all 0.2s ease; box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .menu-btn:hover:not(.disabled) { 
+            border-color: #3b82f6; background: #eff6ff; transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.15);
+        }
+        .menu-btn .icon { font-size: 2rem; }
+        .menu-btn .text-group { display: flex; flex-direction: column; text-align: left; }
+        .menu-btn .main-text { color: #1e293b; }
+        .menu-btn .sub-text { font-size: 0.85rem; color: #64748b; font-weight: normal; margin-top: 2px; }
+        
+        /* 反灰的按鈕樣式 */
+        .menu-btn.disabled {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.6;
+            filter: grayscale(80%);
+        }
+        .menu-btn.disabled .main-text, .menu-btn.disabled .sub-text { color: #94a3b8; }
+        
+        .admin-btn { background: #fff1f2; border-color: #ffe4e6; margin-top: 15px; }
+        .admin-btn:hover { background: #ffe4e6; border-color: #f43f5e; }
+        .admin-btn .main-text { color: #be123c; }
+        .admin-btn .sub-text { color: #fda4af; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🏥 智慧健康服務平台</h1>
+        <p class="subtitle">請選擇您要進行的評估或訓練項目</p>
+
+        <div class="section-title">🧠 認知與記憶力評估</div>
+        
+        <a href="https://chrysyehddim-pm.github.io/ad8test/" class="menu-btn">
+            <span class="icon">🏪</span>
+            <div class="text-group">
+                <span class="main-text">幸福柑仔店</span>
+                <span class="sub-text">AD8 極早期失智症量表檢測</span>
+            </div>
+        </a>
+
+        <a href="https://chrysyehddim-pm.github.io/memory/" class="menu-btn">
+            <span class="icon">🧩</span>
+            <div class="text-group">
+                <span class="main-text">生活好時光</span>
+                <span class="sub-text">生活記憶力訓練</span>
+            </div>
+        </a>
+
+        <a href="https://chrysyehddim-pm.github.io/execution/" class="menu-btn">
+            <span class="icon">🛒</span>
+            <div class="text-group">
+                <span class="main-text">一日超商店長</span>
+                <span class="sub-text">執行功能與多工處理訓練</span>
+            </div>
+        </a>
+
+        <a href="#" class="menu-btn disabled" onclick="event.preventDefault();">
+            <span class="icon">👀</span>
+            <div class="text-group">
+                <span class="main-text">眼力極限考驗</span>
+                <span class="sub-text">專注力訓練 (敬請期待)</span>
+            </div>
+        </a>
+
+        <div class="section-title">🏃 體能與姿態分析</div>
+
+        <a href="https://chrysyehddim-pm.github.io/Squat-Game-PoC/" class="menu-btn">
+            <span class="icon">🏋️</span>
+            <div class="text-group">
+                <span class="main-text">金幣深蹲王</span>
+                <span class="sub-text">AI 體能姿態分析</span>
+            </div>
+        </a>
+
+        <div class="section-title">⚙️ 系統管理</div>
+
+        <a href="admin.html" class="menu-btn admin-btn">
+            <span class="icon">📊</span>
+            <div class="text-group">
+                <span class="main-text">健康數據中心</span>
+                <span class="sub-text">研究人員與管理員後台</span>
+            </div>
+        </a>
+    </div>
+
+</body>
+</html>
