@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康數據中心 - 管理員後台</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root { --primary: #3b82f6; --bg: #f8fafc; --text: #334155; --border: #e2e8f0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        
+        /* 登入區塊 */
+        #login-section { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; width: 300px; }
+        .login-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        
+        /* 儀表板區塊 */
+        #dashboard-section { display: none; max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid var(--border); }
+        .controls { display: flex; gap: 15px; margin-bottom: 20px; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 16px; min-width: 250px; }
+        
+        button { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #2563eb; }
+        button.export-csv { background: #10b981; }
+        button.export-excel { background: #059669; }
+        button.danger { background: #ef4444; }
+        
+        /* 表格區塊 */
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow-x: auto; max-height: 600px; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { background: #f1f5f9; position: sticky; top: 0; z-index: 10; font-weight: 600; }
+        tr:hover { background: #f8fafc; }
+        
+        .loading { color: #64748b; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section">
+        <div class="login-box">
+            <h2>🔐 管理員登入</h2>
+            <input type="email" id="email" placeholder="管理員信箱">
+            <input type="password" id="password" placeholder="密碼">
+            <button onclick="login()" style="width: 100%;">登入系統</button>
+            <div id="login-error" style="color: red; margin-top: 10px; font-size: 14px;"></div>
+        </div>
+    </div>
+
+    <div id="dashboard-section">
+        <div class="header">
+            <h2>📊 健康數據中心 - 管理後台</h2>
+            <div>
+                <span id="admin-email" style="margin-right: 15px; color: #64748b;"></span>
+                <button class="danger" onclick="logout()">登出</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <label>選擇資料表：</label>
+            <select id="collection-select" onchange="loadPreviewData()">
+                <option value="one_day_manager_results">🏪 一日店長 (one_day_manager_results)</option>
+                <option value="memory_game_results">🧠 記憶力訓練 (memory_game_results)</option>
+                <option value="squat_records">🏋️ 深蹲紀錄-新版 (squat_records)</option>
+                <option value="squatRecords">🏋️ 深蹲紀錄-舊版 (squatRecords)</option>
+                <option value="emotion_records">❤️ 情緒紀錄 (emotion_records)</option>
+                <option value="game_records">🎮 幸福柑仔店遊戲紀錄 (game_records)</option>
+            </select>
+            <div style="flex-grow: 1;"></div>
+            <button class="export-csv" onclick="exportData('csv')">📥 下載 CSV</button>
+            <button class="export-excel" onclick="exportData('xlsx')">📊 下載 Excel</button>
+        </div>
+
+        <p id="status-text">目前顯示：最新 10 筆預覽資料</p>
+
+        <div class="table-container">
+            <table id="data-table">
+                <thead id="table-head"><tr><th>載入中...</th></tr></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Firebase 初始化 ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6wcFs5gSiNDCSweKcEzgRpbIAAb5I3Vo",
+            authDomain: "smart-squat-health.firebaseapp.com",
+            projectId: "smart-squat-health",
+            storageBucket: "smart-squat-health.firebasestorage.app",
+            messagingSenderId: "475970550783",
+            appId: "1:475970550783:web:2d7dcacb2e55b562eb05ca"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentData = []; // 存放目前抓下來的資料
+
+        // --- 2. 登入與權限控制 ---
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('admin-email').textContent = user.email;
+                loadPreviewData(); // 登入成功後自動載入資料
+            } else {
+                document.getElementById('login-section').style.display = 'flex';
+                document.getElementById('dashboard-section').style.display = 'none';
+            }
+        });
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const pwd = document.getElementById('password').value;
+            auth.signInWithEmailAndPassword(email, pwd)
+                .catch(error => {
+                    document.getElementById('login-error').textContent = "登入失敗：" + error.message;
+                });
+        }
+
+        function logout() { auth.signOut(); }
+
+        // --- 3. 資料處理工具 ---
+ // --- 3. 資料處理工具 ---
+        // 格式化時間 (支援 Unix 時間戳與 Firebase Timestamp)
+        function formatTimestamp(ts) {
+            if (!ts) return '';
+            if (typeof ts === 'string') return ts; // 如果已經是字串就直接回傳
+            
+            let date;
+            // 處理 Firebase 專屬的 Timestamp 物件 (帶有 toDate 方法)
+            if (typeof ts === 'object' && typeof ts.toDate === 'function') {
+                date = ts.toDate();
+            } else {
+                // 處理一般的毫秒數字
+                date = new Date(ts);
+            }
+            return date.toLocaleString('zh-TW', { hour12: false });
+        }
+
+        // 將巢狀 JSON 與陣列 (Array) 攤平成單層物件，適合 Excel 匯出
+        function flattenObject(ob) {
+            let toReturn = {};
+            for (let i in ob) {
+                if (!ob.hasOwnProperty(i)) continue;
+                
+                // 1. 攔截並轉換 Firebase Timestamp，避免變成 seconds 和 nanoseconds
+                if (ob[i] !== null && typeof ob[i] === 'object' && typeof ob[i].toDate === 'function') {
+                    toReturn[i] = formatTimestamp(ob[i]);
+                    continue;
+                }
+
+                // 2. 處理陣列 (Array) 與物件 (Object)
+                if (ob[i] !== null && typeof ob[i] === 'object') {
+                    let flatObject = flattenObject(ob[i]);
+                    for (let x in flatObject) {
+                        if (!flatObject.hasOwnProperty(x)) continue;
+                        // 陣列展開後，欄位名稱會變成類似 details_0_result, details_1_choice
+                        toReturn[i + '_' + x] = flatObject[x];
+                    }
+                } else {
+                    // 3. 處理基本型別 (字串、數字、布林值)
+                    toReturn[i] = ob[i];
+                }
+            }
+            return toReturn;
+        }
+
+       // --- 4. 讀取並預覽資料 ---
+       async function loadPreviewData() {
+            const collectionName = document.getElementById('collection-select').value;
+            const thead = document.getElementById('table-head');
+            const tbody = document.getElementById('table-body');
+            const status = document.getElementById('status-text');
+            
+            thead.innerHTML = '<tr><th>載入中...</th></tr>';
+            tbody.innerHTML = '';
+            status.textContent = '資料抓取中...';
+            currentData = [];
+
+            try {
+                // 【關鍵修改】：判斷是不是新遊戲。新遊戲才用 client_timestamp 排序
+                let query = db.collection(collectionName);
+                if (collectionName === 'one_day_manager_results' || collectionName === 'memory_game_results') {
+                    query = query.orderBy('client_timestamp', 'desc');
+                }
+
+                // 抓取 10 筆資料
+                const snapshot = await query.limit(10).get();
+
+                if (snapshot.empty) {
+                    thead.innerHTML = '<tr><th>無資料</th></tr>';
+                    status.textContent = `目前資料表 [${collectionName}] 中沒有任何資料。`;
+                    return;
+                }
+
+                // 將資料攤平並整理格式
+                snapshot.forEach(doc => {
+                    let rawData = doc.data();
+                    let flatData = flattenObject(rawData);
+                    
+                    // 特別處理時間欄位
+                    if (flatData.client_timestamp) {
+                        flatData.formatted_time = formatTimestamp(flatData.client_timestamp);
+                    }
+                    currentData.push(flatData);
+                });
+
+                renderTable();
+                status.textContent = `✅ 成功載入！目前顯示：[${collectionName}] 的最新 ${currentData.length} 筆預覽資料。下載匯出時會抓取全部資料。`;
+
+            } catch (error) {
+                console.error("讀取失敗:", error);
+                thead.innerHTML = '<tr><th style="color:red;">權限不足或讀取失敗</th></tr>';
+                status.textContent = "讀取失敗：" + error.message;
+            }
+        }
+
+        // --- 5. 渲染表格 ---
+        function renderTable() {
+            if (currentData.length === 0) return;
+
+            // 抓出所有出現過的欄位名稱 (作為表頭)
+            let allKeys = new Set();
+            currentData.forEach(item => Object.keys(item).forEach(k => allKeys.add(k)));
+            
+            // 排序欄位：讓時間、姓名等重要資訊排前面
+            let sortedKeys = Array.from(allKeys).sort((a, b) => {
+                const priority = ['formatted_time', 'user_name', 'user_age', 'session_id'];
+                let indexA = priority.indexOf(a);
+                let indexB = priority.indexOf(b);
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+                if (indexA !== -1) return -1;
+                if (indexB !== -1) return 1;
+                return a.localeCompare(b); // 其他按字母排序
+            });
+
+            // 建立表頭
+            const thead = document.getElementById('table-head');
+            let headRow = '<tr>';
+            sortedKeys.forEach(key => headRow += `<th>${key}</th>`);
+            headRow += '</tr>';
+            thead.innerHTML = headRow;
+
+            // 建立資料列
+            const tbody = document.getElementById('table-body');
+            let bodyHTML = '';
+            currentData.forEach(item => {
+                bodyHTML += '<tr>';
+                sortedKeys.forEach(key => {
+                    let val = item[key] !== undefined ? item[key] : '';
+                    bodyHTML += `<td>${val}</td>`;
+                });
+                bodyHTML += '</tr>';
+            });
+            tbody.innerHTML = bodyHTML;
+        }
+
+        // --- 6. 匯出全部資料 (CSV / Excel) ---
+        async function exportData(format) {
+            const collectionName = document.getElementById('collection-select').value;
+            const status = document.getElementById('status-text');
+            status.textContent = '⏳ 正在抓取全部資料準備匯出，請稍候...';
+
+            try {
+                // 【關鍵修改】：匯出時也一樣，舊遊戲不強制排序
+                let query = db.collection(collectionName);
+                if (collectionName === 'one_day_manager_results' || collectionName === 'memory_game_results') {
+                    query = query.orderBy('client_timestamp', 'desc');
+                }
+                
+                const snapshot = await query.get();
+                let exportDataArray = [];
+
+                snapshot.forEach(doc => {
+                    let flatData = flattenObject(doc.data());
+                    if (flatData.client_timestamp) flatData.formatted_time = formatTimestamp(flatData.client_timestamp);
+                    exportDataArray.push(flatData);
+                });
+
+                if (exportDataArray.length === 0) {
+                    alert("沒有資料可以匯出！");
+                    status.textContent = '目前顯示：最新 10 筆預覽資料';
+                    return;
+                }
+
+                // 產生檔名
+                const dateStr = new Date().toISOString().slice(0, 10);
+                const filename = `${collectionName}_export_${dateStr}.${format}`;
+
+                // 使用 SheetJS 建立工作表
+                const worksheet = XLSX.utils.json_to_sheet(exportDataArray);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+                // 觸發下載
+                if (format === 'csv') {
+                    XLSX.writeFile(workbook, filename, { bookType: "csv" });
+                } else {
+                    XLSX.writeFile(workbook, filename, { bookType: "xlsx" });
+                }
+
+                status.textContent = `✅ 匯出成功！共下載了 ${exportDataArray.length} 筆資料。`;
+
+            } catch (error) {
+                console.error("匯出失敗:", error);
+                alert("匯出失敗：" + error.message);
+                status.textContent = '目前顯示：最新 10 筆預覽資料';
+            }
+        }
+    </script>
+</body>
+</html>
