@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f0fdf4; /* 溫和的淺綠色背景 */
+            background: #f0fdf4;
             color: #1e293b;
             margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center;
@@ -50,7 +50,6 @@
         .menu-btn .main-text { color: #1e293b; }
         .menu-btn .sub-text { font-size: 0.85rem; color: #64748b; font-weight: normal; margin-top: 2px; }
         
-        /* 反灰的按鈕樣式 */
         .menu-btn.disabled {
             background: #f1f5f9;
             border-color: #e2e8f0;
@@ -66,20 +65,21 @@
         .admin-btn .main-text { color: #be123c; }
         .admin-btn .sub-text { color: #fda4af; }
 
-        /* 新增 Footer Logo 樣式 */
+        /* 更新 Footer Logo 樣式：放大尺寸與調整間距 */
         .footer-logos {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 25px;
+            gap: 35px; /* 加大間距，避免放大後擁擠 */
             margin-top: 40px;
             padding-top: 20px;
             border-top: 1px solid #f1f5f9;
         }
         .footer-logos img {
-            height: 40px; /* 控制 Logo 高度維持一致 */
+            height: 70px; /* 從 40px 顯著提升至 70px */
+            max-width: 180px; /* 增加最大寬度限制，確保在行動裝置不破版 */
             object-fit: contain;
-            opacity: 0.85; /* 稍微降低透明度，避免搶過上方主按鈕視覺焦點 */
+            opacity: 0.85;
             transition: opacity 0.2s ease;
         }
         .footer-logos img:hover {
@@ -148,8 +148,8 @@
         </a>
 
         <div class="footer-logos">
-            <img src="https://www.feg.com.tw/upload/business/logo_1_20220331026.png" alt="HAPPY GO Logo">
-            <img src="https://www.feg.com.tw/upload/business/logo_1_20230119008.png" alt="亞東紀念醫院 Logo">
+            <img src="images/hg.png" alt="HAPPY GO Logo">
+            <img src="images/femh.png" alt="亞東紀念醫院 Logo">
         </div>
     </div>
 
