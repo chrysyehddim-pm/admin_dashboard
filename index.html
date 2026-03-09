@@ -65,6 +65,26 @@
         .admin-btn:hover { background: #ffe4e6; border-color: #f43f5e; }
         .admin-btn .main-text { color: #be123c; }
         .admin-btn .sub-text { color: #fda4af; }
+
+        /* 新增 Footer Logo 樣式 */
+        .footer-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .footer-logos img {
+            height: 40px; /* 控制 Logo 高度維持一致 */
+            object-fit: contain;
+            opacity: 0.85; /* 稍微降低透明度，避免搶過上方主按鈕視覺焦點 */
+            transition: opacity 0.2s ease;
+        }
+        .footer-logos img:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -75,7 +95,7 @@
 
         <div class="section-title">🧠 認知與記憶力評估</div>
         
-        <a href="https://chrysyehddim-pm.github.io/ad8test/" class="menu-btn">
+        <a href="https://ad8test.vercel.app/" class="menu-btn" target="_blank">
             <span class="icon">🏪</span>
             <div class="text-group">
                 <span class="main-text">幸福柑仔店</span>
@@ -83,7 +103,7 @@
             </div>
         </a>
 
-        <a href="https://chrysyehddim-pm.github.io/memory/" class="menu-btn">
+        <a href="https://memory-five-blond.vercel.app/" class="menu-btn" target="_blank">
             <span class="icon">🧩</span>
             <div class="text-group">
                 <span class="main-text">生活好時光</span>
@@ -91,7 +111,7 @@
             </div>
         </a>
 
-        <a href="https://chrysyehddim-pm.github.io/execution/" class="menu-btn">
+        <a href="https://execution.vercel.app/" class="menu-btn" target="_blank">
             <span class="icon">🛒</span>
             <div class="text-group">
                 <span class="main-text">一日超商店長</span>
@@ -99,17 +119,17 @@
             </div>
         </a>
 
-        <a href="#" class="menu-btn disabled" onclick="event.preventDefault();">
+        <a href="https://concentration-eta.vercel.app/" class="menu-btn" target="_blank">
             <span class="icon">👀</span>
             <div class="text-group">
                 <span class="main-text">眼力極限考驗</span>
-                <span class="sub-text">專注力訓練 (敬請期待)</span>
+                <span class="sub-text">專注力訓練</span>
             </div>
         </a>
 
         <div class="section-title">🏃 體能與姿態分析</div>
 
-        <a href="https://chrysyehddim-pm.github.io/Squat-Game-PoC/" class="menu-btn">
+        <a href="https://squat-game-po-c.vercel.app/" class="menu-btn" target="_blank">
             <span class="icon">🏋️</span>
             <div class="text-group">
                 <span class="main-text">金幣深蹲王</span>
@@ -126,6 +146,11 @@
                 <span class="sub-text">研究人員與管理員後台</span>
             </div>
         </a>
+
+        <div class="footer-logos">
+            <img src="https://www.feg.com.tw/upload/business/logo_1_20220331026.png" alt="HAPPY GO Logo">
+            <img src="https://www.feg.com.tw/upload/business/logo_1_20230119008.png" alt="亞東紀念醫院 Logo">
+        </div>
     </div>
 
 </body>
